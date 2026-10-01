@@ -86,6 +86,7 @@
                             </div>
                             <div class="small mt-2">{{ finding.detail }}</div>
                             <div class="small text-primary mt-1">建议：{{ finding.suggestion }}</div>
+                            {% if finding.citation %}<div class="small text-muted mt-1">依据：{{ finding.citation.clause }}</div>{% endif %}
                         </div>
                     {% endfor %}
                 </div>

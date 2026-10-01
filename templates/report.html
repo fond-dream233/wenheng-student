@@ -15,11 +15,11 @@
 <body>
 {% set cat_names = {'page': '页面设置', 'body': '正文格式', 'heading': '标题格式',
     'structure': '结构与篇幅', 'toc': '目录', 'figure': '图与表', 'ref': '参考文献',
-    'misc': '排版细节', 'argument': '论证质量', 'ai': 'AI 痕迹'} %}
+    'misc': '排版细节', 'argument': '论证质量', 'ai': 'AI 痕迹', 'reasonableness': '内容合理性'} %}
 {% set ns = namespace(s=0.0, a=0.0, ai=0.0) %}
 {% for f in result.logic_report.findings %}
     {% if f.category == 'structure' %}{% set ns.s = ns.s + f.penalty %}
-    {% elif f.category == 'argument' %}{% set ns.a = ns.a + f.penalty %}
+    {% elif f.category in ['argument', 'reasonableness'] %}{% set ns.a = ns.a + f.penalty %}
     {% else %}{% set ns.ai = ns.ai + f.penalty %}{% endif %}
 {% endfor %}
 <div class="container py-4" style="max-width: 1100px;">

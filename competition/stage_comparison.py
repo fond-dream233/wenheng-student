@@ -8,6 +8,7 @@ from pathlib import Path
 from typing import Any, Iterable
 
 from tools.docx_parser import DocInfo, Section, parse_docx
+from tools.knowledge_base import cite_for
 
 STAGE_ORDER = {"proposal": 0, "midterm": 1, "final": 2}
 STAGE_LABELS = {"proposal": "开题", "midterm": "中期", "final": "终稿"}
@@ -174,6 +175,8 @@ def compare_stage_documents(documents: list[tuple[str, Path, str]]) -> dict[str,
     overall_score = round(max(scores) * 0.6 + (sum(scores) / len(scores)) * 0.4, 2)
     risk_level = "high" if overall_score >= 65 else "medium" if overall_score >= 35 else "low"
     findings = [finding for comparison in comparisons for finding in comparison["findings"]]
+    for finding in findings:
+        finding["citation"] = cite_for(f"{finding['title']} {finding['detail']}")
     stage_summaries = []
     for item in parsed:
         doc: DocInfo = item["doc"]

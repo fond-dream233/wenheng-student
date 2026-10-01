@@ -27,6 +27,7 @@ from tools.logic_checks import check_structure_completeness
 from tools.logic_checks import check_stage_requirements
 from tools.logic_utils import split_paragraphs, split_sentences
 from tools.models import LogicFinding, LogicReport
+from tools.reasonableness_checks import run_reasonableness_checks
 
 logger = get_logger('logic')
 
@@ -115,6 +116,10 @@ class LogicExpert:
             else:
                 if stage_result:
                     findings.append(stage_result)
+        try:
+            findings.extend(run_reasonableness_checks(ctx, stage))
+        except Exception as exc:  # noqa: BLE001 - 合理性检查异常不影响整体
+            logger.warning('内容合理性检查失败：%s', exc)
         _attach_citations(findings, stage)
 
         penalty = sum(f.penalty for f in findings)
@@ -132,7 +137,8 @@ class LogicExpert:
 def _attach_citations(findings: List[LogicFinding], stage: Optional[str]) -> None:
     """为每条发现项附加知识库中的规范条文作为依据。"""
     for finding in findings:
-        finding.citation = cite_for(f"{finding.title} {finding.detail}", stage=stage)
+        citation_stage = None if finding.category == "reasonableness" else stage
+        finding.citation = cite_for(f"{finding.title} {finding.detail}", stage=citation_stage)
 
 
 def _build_strengths(ctx: LogicContext, ai_likelihood: float) -> List[str]:

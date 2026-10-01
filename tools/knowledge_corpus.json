@@ -81,6 +81,14 @@
       "tags": ["论证", "逻辑自洽", "论据", "矛盾"]
     },
     {
+      "id": "common-cross-001",
+      "stage": "common",
+      "category": "logic",
+      "title": "跨阶段内容一致性",
+      "clause": "开题、中期与毕业论文应保持研究主题、研究目标与内容的一致性与连续性，如有调整应说明变更原因。",
+      "tags": ["跨阶段", "一致性", "连续性", "变更说明", "研究主题"]
+    },
+    {
       "id": "proposal-struct-001",
       "stage": "proposal",
       "category": "structure",
