@@ -33,7 +33,7 @@ def test_search_returns_relevant_top_hit(kb: KnowledgeBase) -> None:
 def test_stage_filter(kb: KnowledgeBase) -> None:
     results = kb.search("研究现状 进度 成果", k=10, stage="midterm")
     assert results
-    assert all(item["stage"] == "midterm" for item in results)
+    assert all(item["stage"] in {"midterm", "common"} for item in results)
 
 
 def test_category_filter(kb: KnowledgeBase) -> None:

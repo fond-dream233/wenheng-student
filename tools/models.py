@@ -2,7 +2,7 @@
 from __future__ import annotations
 
 from dataclasses import dataclass, field
-from typing import Dict, List, Optional
+from typing import Any, Dict, List, Optional
 
 
 @dataclass
@@ -15,6 +15,7 @@ class Issue:
     location: str
     message: str
     suggestion: str
+    citation: Optional[Dict[str, Any]] = None
 
 
 @dataclass
@@ -87,6 +88,7 @@ class LogicFinding:
     detail: str
     suggestion: str
     metrics: Dict[str, float] = field(default_factory=dict)
+    citation: Optional[Dict[str, Any]] = None
 
 
 @dataclass

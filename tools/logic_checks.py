@@ -63,6 +63,47 @@ def check_structure_completeness(ctx: LogicContext) -> Optional[LogicFinding]:
     )
 
 
+_STAGE_LABELS_CN = {"proposal": "开题", "midterm": "中期", "final": "终稿"}
+
+STAGE_REQUIRED_SECTIONS: Dict[str, List[tuple[str, tuple[str, ...]]]] = {
+    "proposal": [
+        ("研究目标或内容", ("研究目标", "研究内容", "研究目的", "拟解决", "课题目标")),
+        ("研究方法或技术路线", ("研究方法", "技术路线", "研究方案", "实施方案", "技术方案")),
+        ("研究现状", ("研究现状", "国内外", "综述", "相关研究")),
+    ],
+    "midterm": [
+        ("阶段性成果或进展", ("阶段性成果", "研究进展", "目前进展", "已完成", "阶段成果")),
+        ("存在问题与后续计划", ("存在问题", "后续计划", "下一步", "解决方案", "下一步计划")),
+    ],
+    "final": [
+        ("结论", ("结论", "总结", "展望")),
+        ("参考文献", ("参考文献", "References", "参考")),
+        ("摘要", ("摘要", "Abstract")),
+    ],
+}
+
+
+def check_stage_requirements(ctx: LogicContext, stage: str) -> Optional[LogicFinding]:
+    """按阶段检查应包含的章节要素是否齐全。"""
+    required = STAGE_REQUIRED_SECTIONS.get(stage)
+    if not required:
+        return None
+    titles = [s.title for s in ctx.sections] or [p.text for p in ctx.doc.paragraphs if p.is_heading]
+    joined = " ".join(titles).replace(" ", "")
+    missing = [label for label, keys in required if not any(k in joined for k in keys)]
+    if not missing:
+        return None
+    label = _STAGE_LABELS_CN.get(stage, stage)
+    return _finding(
+        'stage_requirements', 'structure', f'{label}阶段要素缺失',
+        'error' if len(missing) >= 2 else 'warning',
+        min(10.0, 2.5 * len(missing)),
+        f"缺少{label}阶段应包含的内容：{'、'.join(missing)}",
+        f"补充{label}阶段应有的章节要素",
+        {'missing': float(len(missing))},
+    )
+
+
 def check_section_order(ctx: LogicContext) -> Optional[LogicFinding]:
     """检查章节顺序是否合理。"""
     titles = [s.title for s in ctx.sections]

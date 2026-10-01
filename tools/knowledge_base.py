@@ -73,8 +73,13 @@ class KnowledgeBase:
         scored: list[tuple[float, int]] = []
         for position, doc_tokens in enumerate(self._index):
             entry = self.entries[position]
-            if stage is not None and entry.get("stage") != stage:
-                continue
+            if stage is not None:
+                entry_stage = entry.get("stage", "common")
+                if stage == "common":
+                    if entry_stage != "common":
+                        continue
+                elif entry_stage not in (stage, "common"):
+                    continue
             if category is not None and entry.get("category") != category:
                 continue
             scored.append((self._bm25(query_tokens, doc_tokens, self._lengths[position]), position))
@@ -115,3 +120,26 @@ class KnowledgeBase:
 def available_stages(entries: Iterable[dict[str, Any]]) -> set[str]:
     """返回语料中出现的全部阶段标签，供调用方构建过滤选项。"""
     return {entry.get("stage", "common") for entry in entries}
+
+
+_default: KnowledgeBase | None = None
+
+
+def default_kb() -> KnowledgeBase:
+    """返回进程内缓存的默认知识库实例。"""
+    global _default
+    if _default is None:
+        _default = KnowledgeBase.load()
+    return _default
+
+
+def cite_for(
+    text: str,
+    *,
+    stage: str | None = None,
+    category: str | None = None,
+    k: int = 1,
+) -> dict[str, Any] | None:
+    """返回与 text 最相关的一条规范条文，找不到则为 None。"""
+    items = default_kb().cite(text, k=k, stage=stage, category=category)
+    return items[0] if items else None

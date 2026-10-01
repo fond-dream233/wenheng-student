@@ -1,10 +1,11 @@
 """论文格式专家引擎：按教师配置的规范逐项检查并汇总格式分（0-100）。"""
 from __future__ import annotations
 
-from typing import Dict, List
+from typing import Dict, List, Optional
 
 from tools.docx_parser import DocInfo
 from tools.format_checks import CHECKS, Finding, MAX_FINDINGS_PER_RULE
+from tools.knowledge_base import cite_for
 from tools.models import FormatReport, Issue, RuleResult
 
 
@@ -19,11 +20,12 @@ class FormatExpert:
         """
         self.rules = rules or {}
 
-    def check(self, doc: DocInfo) -> FormatReport:
+    def check(self, doc: DocInfo, stage: Optional[str] = None) -> FormatReport:
         """执行格式检查。
 
         Args:
             doc: 论文结构化信息。
+            stage: 论文阶段（proposal/midterm/final），用于依据检索。
 
         Returns:
             FormatReport；未启用任何规则时 score 为 None。
@@ -56,8 +58,15 @@ class FormatExpert:
             ]
             report.issues.extend(item.issues)
             report.items.append(item)
+        self._attach_citations(report, stage)
         self._summarize(report)
         return report
+
+    @staticmethod
+    def _attach_citations(report: FormatReport, stage: Optional[str]) -> None:
+        """为每条格式问题附加知识库中的规范条文作为依据。"""
+        for issue in report.issues:
+            issue.citation = cite_for(f"{issue.rule_title} {issue.message}", stage=stage)
 
     @staticmethod
     def _run(func, doc: DocInfo, expected: str, findings: List[Finding]) -> float:

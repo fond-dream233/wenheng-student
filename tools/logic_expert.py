@@ -5,6 +5,7 @@ import re
 from typing import Callable, List, Optional
 
 from tools.docx_parser import DocInfo
+from tools.knowledge_base import cite_for
 from tools.logger import get_logger
 from tools.logic_ai_checks import (calc_ai_likelihood, check_abstract_conclusion_similarity,
                                    check_ai_cliche, check_connector_overuse,
@@ -23,6 +24,7 @@ from tools.logic_checks import check_one_sentence_paragraph
 from tools.logic_checks import check_section_balance
 from tools.logic_checks import check_section_order
 from tools.logic_checks import check_structure_completeness
+from tools.logic_checks import check_stage_requirements
 from tools.logic_utils import split_paragraphs, split_sentences
 from tools.models import LogicFinding, LogicReport
 
@@ -85,11 +87,12 @@ ALL_CHECKS: List[Callable[[LogicContext], Optional[LogicFinding]]] = [
 class LogicExpert:
     """论文逻辑专家：检查结构、论证与 AI 生成痕迹。"""
 
-    def analyze(self, doc: DocInfo) -> LogicReport:
+    def analyze(self, doc: DocInfo, stage: Optional[str] = None) -> LogicReport:
         """执行逻辑分析。
 
         Args:
             doc: 论文结构化信息。
+            stage: 论文阶段（proposal/midterm/final），用于阶段要素检查与依据检索。
 
         Returns:
             LogicReport，含逻辑分与 AI 可能性评分。
@@ -104,6 +107,15 @@ class LogicExpert:
                 continue
             if result:
                 findings.append(result)
+        if stage:
+            try:
+                stage_result = check_stage_requirements(ctx, stage)
+            except Exception as exc:  # noqa: BLE001 - 阶段检查异常不影响整体
+                logger.warning('阶段要素检查失败：%s', exc)
+            else:
+                if stage_result:
+                    findings.append(stage_result)
+        _attach_citations(findings, stage)
 
         penalty = sum(f.penalty for f in findings)
         score = round(max(0.0, min(100.0, 100.0 - penalty)), 1)
@@ -115,6 +127,12 @@ class LogicExpert:
             metrics=ctx.metrics,
             strengths=_build_strengths(ctx, ai_likelihood),
         )
+
+
+def _attach_citations(findings: List[LogicFinding], stage: Optional[str]) -> None:
+    """为每条发现项附加知识库中的规范条文作为依据。"""
+    for finding in findings:
+        finding.citation = cite_for(f"{finding.title} {finding.detail}", stage=stage)
 
 
 def _build_strengths(ctx: LogicContext, ai_likelihood: float) -> List[str]:

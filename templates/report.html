@@ -179,7 +179,9 @@
                                     {{ '严重' if issue.level == 'error' else ('一般' if issue.level == 'warning' else '提示') }}</span>
                             </td>
                             <td class="small">{{ issue.location }}</td>
-                            <td class="small">{{ issue.message }}</td>
+                            <td class="small">{{ issue.message }}
+                                {% if issue.citation %}<div class="text-muted mt-1"><small>依据：{{ issue.citation.clause }}</small></div>{% endif %}
+                            </td>
                             <td class="small text-muted">{{ issue.suggestion }}</td>
                         </tr>
                     {% endfor %}
@@ -213,7 +215,9 @@
                                     {{ '严重' if finding.level == 'error' else '一般' }}</span>
                                 {{ finding.title }}
                             </td>
-                            <td class="small">{{ finding.detail }}</td>
+                            <td class="small">{{ finding.detail }}
+                                {% if finding.citation %}<div class="text-muted mt-1"><small>依据：{{ finding.citation.clause }}</small></div>{% endif %}
+                            </td>
                             <td class="small text-muted">{{ finding.suggestion }}</td>
                             <td class="small">-{{ '%.1f'|format(finding.penalty) }}</td>
                         </tr>

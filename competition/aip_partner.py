@@ -163,13 +163,16 @@ def _bind_sender(task: TaskResult, aic: str) -> TaskResult:
 
 def _analyse(role: PartnerRole, path: Path, payload: dict[str, Any]) -> dict[str, Any]:
     doc = parse_docx(path)
+    stage = payload.get("stage")
+    if stage not in ("proposal", "midterm", "final"):
+        stage = None
     if role == "format":
         supplied = payload.get("rules")
         rules = supplied if isinstance(supplied, dict) else _default_rules()
-        report = FormatExpert(rules).check(doc)
+        report = FormatExpert(rules).check(doc, stage=stage)
         return {"agent": "format", "report": asdict(report), "stats": dict(doc.stats)}
     if role == "logic":
-        report = LogicExpert().analyze(doc)
+        report = LogicExpert().analyze(doc, stage=stage)
         return {"agent": "logic", "report": asdict(report), "stats": dict(doc.stats)}
     raise ValueError(f"角色 {role} 需要多阶段输入")
 

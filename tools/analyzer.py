@@ -67,8 +67,9 @@ class Analyzer:
         rules = self.db.get_rules()
         if Config.COMPETITION_MODE and 'header_text' in rules:
             rules['header_text'] = {**rules['header_text'], 'enabled': False, 'expected': ''}
-        format_report = FormatExpert(rules).check(doc)
-        logic_report = LogicExpert().analyze(doc)
+        stage = row['stage']
+        format_report = FormatExpert(rules).check(doc, stage=stage)
+        logic_report = LogicExpert().analyze(doc, stage=stage)
 
         format_score = format_report.score
         logic_score = logic_report.score
