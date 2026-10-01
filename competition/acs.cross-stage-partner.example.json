@@ -1,0 +1,30 @@
+{
+  "aic": "REPLACE_WITH_CROSS_STAGE_PARTNER_AIC",
+  "active": true,
+  "lastModifiedTime": "2026-09-21T00:00:00+08:00",
+  "protocolVersion": "02.02",
+  "name": "论文跨阶段对比智能体",
+  "description": "对比开题、中期和终稿的研究主题、目标、目录、关键词与篇幅变化，输出可追溯的漂移指标和修改建议。",
+  "version": "0.1.0",
+  "provider": {"organization": "参赛团队", "department": "", "url": "", "license": "MulanPSL-2.0"},
+  "securitySchemes": {"mtls": {"type": "mutualTLS", "description": "智能体间 mTLS 双向认证"}},
+  "endPoints": [
+    {"url": "https://REPLACE_WITH_CROSS_STAGE_HOST/rpc", "transport": "JSONRPC", "security": [{"mtls": []}]}
+  ],
+  "certificate": {"altNames": {"dns": ["REPLACE_WITH_CROSS_STAGE_HOST"]}},
+  "capabilities": {"streaming": false, "notification": false, "messageQueue": []},
+  "defaultInputModes": ["application/json", "application/vnd.openxmlformats-officedocument.wordprocessingml.document"],
+  "defaultOutputModes": ["application/json"],
+  "skills": [
+    {
+      "id": "thesis-review.cross-stage-comparison",
+      "name": "论文跨阶段对比",
+      "description": "接收两个或三个阶段文档，返回相邻阶段的主题、目标、结构、关键词与篇幅漂移指标。",
+      "version": "0.1.0",
+      "tags": ["跨阶段对比", "目标漂移", "开题", "中期", "终稿"],
+      "examples": ["比较开题报告、中期报告和终稿，指出目标或研究内容是否发生未说明的漂移"],
+      "inputModes": ["application/json"],
+      "outputModes": ["application/json"]
+    }
+  ]
+}

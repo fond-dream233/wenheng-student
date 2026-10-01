@@ -1,0 +1,7 @@
+# Optional competition adapter dependencies.
+# The Git URL deliberately points to the official AIP-PUB reference
+# implementation required by the competition, rather than an unrelated
+# package that happens to use the name "AIP".
+-r requirements.txt
+httpx>=0.27.0
+acps-sdk @ git+https://github.com/AIP-PUB/ACPs-community.git@3985c1330209f075c124669cc9d31f0e75448140#subdirectory=acps-sdk

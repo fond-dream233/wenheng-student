@@ -1,0 +1,264 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <title>论文检查报告 - {{ result.paper_title }}</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css" rel="stylesheet">
+    <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.1/dist/chart.umd.min.js"></script>
+    <style>
+        body { background: #f5f7fa; }
+        .score-badge { font-size: 2.2rem; font-weight: 700; line-height: 1.1; }
+        @media print { .no-print { display: none !important; } body { background: #fff; } }
+    </style>
+</head>
+<body>
+{% set cat_names = {'page': '页面设置', 'body': '正文格式', 'heading': '标题格式',
+    'structure': '结构与篇幅', 'toc': '目录', 'figure': '图与表', 'ref': '参考文献',
+    'misc': '排版细节', 'argument': '论证质量', 'ai': 'AI 痕迹'} %}
+{% set ns = namespace(s=0.0, a=0.0, ai=0.0) %}
+{% for f in result.logic_report.findings %}
+    {% if f.category == 'structure' %}{% set ns.s = ns.s + f.penalty %}
+    {% elif f.category == 'argument' %}{% set ns.a = ns.a + f.penalty %}
+    {% else %}{% set ns.ai = ns.ai + f.penalty %}{% endif %}
+{% endfor %}
+<div class="container py-4" style="max-width: 1100px;">
+    <div class="d-flex justify-content-between align-items-start mb-3">
+        <div>
+            <h4 class="mb-1">{{ school_name }} 本科毕业论文检查报告</h4>
+            <div class="text-muted">
+                论文：{{ result.paper_title }} ｜ 学生：{{ result.student_name }}
+            </div>
+        </div>
+        <button class="btn btn-outline-secondary no-print" onclick="history.back()">返回</button>
+    </div>
+
+    <div class="row g-3 mb-3">
+        <div class="col-md-3">
+            <div class="card text-center h-100 border-primary">
+                <div class="card-body">
+                    <div class="text-muted small">综合总分</div>
+                    <div class="score-badge text-primary">
+                        {{ '%.1f'|format(result.total_score) if result.total_score is not none else '--' }}</div>
+                    <div class="text-muted">{{ result.grade }}</div>
+                </div>
+            </div>
+        </div>
+        <div class="col-md-3">
+            <div class="card text-center h-100">
+                <div class="card-body">
+                    <div class="text-muted small">格式专家评分</div>
+                    <div class="score-badge">
+                        {{ '%.1f'|format(result.format_score) if result.format_score is not none else '--' }}</div>
+                    <div class="text-muted small">
+                        {% if result.format_score is none %}规范未配置{% else %}
+                            错误 {{ result.format_report.error_count }} / 提示 {{ result.format_report.warning_count }}{% endif %}
+                    </div>
+                </div>
+            </div>
+        </div>
+        <div class="col-md-3">
+            <div class="card text-center h-100">
+                <div class="card-body">
+                    <div class="text-muted small">逻辑专家评分</div>
+                    <div class="score-badge">{{ '%.1f'|format(result.logic_score) }}</div>
+                    <div class="text-muted small">问题 {{ result.logic_report.findings | length }} 项</div>
+                </div>
+            </div>
+        </div>
+        <div class="col-md-3">
+            <div class="card text-center h-100 {{ 'border-danger' if result.logic_report.ai_likelihood >= 70 else '' }}">
+                <div class="card-body">
+                    <div class="text-muted small">AI 生成痕迹</div>
+                    <div class="score-badge {{ 'text-danger' if result.logic_report.ai_likelihood >= 70 else '' }}">
+                        {{ '%.0f'|format(result.logic_report.ai_likelihood) }}</div>
+                    <div class="text-muted small">
+                        {% if result.logic_report.ai_likelihood >= 70 %}高度疑似 AI 生成
+                        {% elif result.logic_report.ai_likelihood >= 45 %}存在 AI 痕迹
+                        {% else %}痕迹不明显{% endif %}</div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div class="card mb-3">
+        <div class="card-body">
+            <h6 class="card-title">总体评价</h6>
+            <p class="mb-2">{{ result.summary }}</p>
+            <div class="row">
+                <div class="col-md-6">
+                    <h6 class="small text-success">论文优点</h6>
+                    <ul class="small mb-0">
+                        {% for item in result.logic_report.strengths %}<li>{{ item }}</li>{% endfor %}
+                    </ul>
+                </div>
+                <div class="col-md-6">
+                    <h6 class="small text-muted">文本统计</h6>
+                    <ul class="small mb-0">
+                        <li>中文字符：{{ result.stats.get('chars_cn', 0) }} 字</li>
+                        <li>段落数：{{ result.stats.get('paragraphs', 0) }}，标题数：{{ result.stats.get('headings', 0) }}</li>
+                    </ul>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div class="row g-3 mb-3">
+        <div class="col-lg-7">
+            <div class="card h-100">
+                <div class="card-body">
+                    <h6 class="card-title">格式检查项得分率</h6>
+                    <canvas id="fmtChart" height="220"></canvas>
+                </div>
+            </div>
+        </div>
+        <div class="col-lg-5">
+            <div class="card h-100">
+                <div class="card-body">
+                    <h6 class="card-title">逻辑问题扣分分布</h6>
+                    <canvas id="logicChart" height="220"></canvas>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div class="card mb-3">
+        <div class="card-header bg-white"><strong>一、格式专家报告</strong>
+            <span class="text-muted small">按教师配置的规范逐项检查</span></div>
+        <div class="card-body p-0">
+            {% set active_rules = result.format_report.items | selectattr('configured') | list %}
+            {% if active_rules %}
+                <table class="table table-sm mb-0 align-middle">
+                    <thead class="table-light">
+                    <tr>
+                        <th>分类</th>
+                        <th>检查项</th>
+                        <th>规范要求</th>
+                        <th style="width:120px;">得分率</th>
+                        <th style="width:80px;">结果</th>
+                    </tr>
+                    </thead>
+                    <tbody>
+                    {% for rule in active_rules %}
+                        <tr>
+                            <td class="small">{{ cat_names.get(rule.category, rule.category) }}</td>
+                            <td class="small">{{ rule.title }}</td>
+                            <td class="small">{{ rule.expected }}</td>
+                            <td>
+                                <div class="progress" style="height:8px;">
+                                    <div class="progress-bar {{ 'bg-success' if rule.pass_ratio >= 0.8 else ('bg-warning' if rule.pass_ratio >= 0.5 else 'bg-danger') }}"
+                                         style="width: {{ (rule.pass_ratio * 100) | round }}%"></div>
+                                </div>
+                                <span class="small text-muted">{{ '%.0f'|format(rule.pass_ratio * 100) }}%</span>
+                            </td>
+                            <td>
+                                {% if rule.status == 'passed' %}<span class="badge bg-success">通过</span>
+                                {% elif rule.status == 'failed' %}<span class="badge bg-danger">不通过</span>
+                                {% else %}<span class="badge bg-warning">部分符合</span>{% endif %}
+                            </td>
+                        </tr>
+                    {% endfor %}
+                    </tbody>
+                </table>
+            {% else %}
+                <div class="p-3 text-muted">未启用任何格式规范，本次不输出格式分。</div>
+            {% endif %}
+        </div>
+        {% if result.format_report.issues %}
+            <div class="card-header bg-white"><strong>格式问题清单（{{ result.format_report.issues | length }} 项）</strong></div>
+            <div class="card-body p-0">
+                <table class="table table-sm mb-0">
+                    <thead class="table-light">
+                    <tr><th style="width:70px;">级别</th><th style="width:160px;">位置</th><th>问题描述</th><th>修改建议</th></tr>
+                    </thead>
+                    <tbody>
+                    {% for issue in result.format_report.issues %}
+                        <tr>
+                            <td>
+                                <span class="badge {{ 'bg-danger' if issue.level == 'error' else ('bg-warning' if issue.level == 'warning' else 'bg-secondary') }}">
+                                    {{ '严重' if issue.level == 'error' else ('一般' if issue.level == 'warning' else '提示') }}</span>
+                            </td>
+                            <td class="small">{{ issue.location }}</td>
+                            <td class="small">{{ issue.message }}</td>
+                            <td class="small text-muted">{{ issue.suggestion }}</td>
+                        </tr>
+                    {% endfor %}
+                    </tbody>
+                </table>
+            </div>
+        {% endif %}
+    </div>
+
+    <div class="card mb-4">
+        <div class="card-header bg-white"><strong>二、逻辑专家报告</strong>
+            <span class="text-muted small">结构、论证与 AI 痕迹分析</span></div>
+        <div class="card-body p-0">
+            {% if result.logic_report.findings %}
+                <table class="table table-sm mb-0">
+                    <thead class="table-light">
+                    <tr>
+                        <th style="width:90px;">类别</th>
+                        <th style="width:180px;">问题</th>
+                        <th>分析说明</th>
+                        <th>修改建议</th>
+                        <th style="width:60px;">扣分</th>
+                    </tr>
+                    </thead>
+                    <tbody>
+                    {% for finding in result.logic_report.findings %}
+                        <tr>
+                            <td class="small">{{ cat_names.get(finding.category, finding.category) }}</td>
+                            <td class="small">
+                                <span class="badge {{ 'bg-danger' if finding.level == 'error' else 'bg-warning' }}">
+                                    {{ '严重' if finding.level == 'error' else '一般' }}</span>
+                                {{ finding.title }}
+                            </td>
+                            <td class="small">{{ finding.detail }}</td>
+                            <td class="small text-muted">{{ finding.suggestion }}</td>
+                            <td class="small">-{{ '%.1f'|format(finding.penalty) }}</td>
+                        </tr>
+                    {% endfor %}
+                    </tbody>
+                </table>
+            {% else %}
+                <div class="p-3 text-success">未发现明显的逻辑或 AI 痕迹问题。</div>
+            {% endif %}
+        </div>
+    </div>
+
+    <p class="text-muted small text-center">
+        本报告由 {{ school_name }} 本科毕业论文检查系统自动生成，评分仅供参考，最终以指导教师审核为准。
+    </p>
+</div>
+<script>
+    const fmtLabels = {{ (result.format_report.items | selectattr('configured') | map(attribute='title') | list) | tojson }};
+    const fmtScores = {{ (result.format_report.items | selectattr('configured') | map(attribute='pass_ratio') | list) | tojson }};
+    if (fmtLabels.length) {
+        new Chart(document.getElementById('fmtChart'), {
+            type: 'bar',
+            data: {
+                labels: fmtLabels,
+                datasets: [{
+                    label: '得分率(%)',
+                    data: fmtScores.map(v => Math.round(v * 100)),
+                    backgroundColor: fmtScores.map(v => v >= 0.8 ? '#198754' : (v >= 0.5 ? '#ffc107' : '#dc3545'))
+                }]
+            },
+            options: {indexAxis: 'y', plugins: {legend: {display: false}}, scales: {x: {min: 0, max: 100}}}
+        });
+    }
+    new Chart(document.getElementById('logicChart'), {
+        type: 'bar',
+        data: {
+            labels: ['结构问题', '论证问题', 'AI 痕迹'],
+            datasets: [{
+                label: '扣分',
+                data: [{{ '%.1f'|format(ns.s) }}, {{ '%.1f'|format(ns.a) }}, {{ '%.1f'|format(ns.ai) }}],
+                backgroundColor: ['#0d6efd', '#fd7e14', '#dc3545']
+            }]
+        },
+        options: {plugins: {legend: {display: false}}, scales: {y: {beginAtZero: true}}}
+    });
+</script>
+</body>
+</html>

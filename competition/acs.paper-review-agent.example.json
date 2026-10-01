@@ -1,0 +1,117 @@
+{
+  "aic": "REPLACE_WITH_PLATFORM_ISSUED_AIC",
+  "active": true,
+  "lastModifiedTime": "2026-09-21T00:00:00+08:00",
+  "protocolVersion": "02.02",
+  "name": "多智能体论文质量审查能力目录",
+  "description": "面向高校论文质检场景的能力目录，涵盖 DOCX 格式检查、结构与论证检查以及开题/中期/终稿跨阶段漂移提示。不承担查重或学术不端定性。",
+  "version": "0.1.0",
+  "provider": {
+    "organization": "参赛团队",
+    "department": "",
+    "url": "",
+    "license": "MulanPSL-2.0"
+  },
+  "securitySchemes": {
+    "mtls": {
+      "type": "mutualTLS",
+      "description": "智能体间 mTLS 双向认证"
+    }
+  },
+  "endPoints": [
+    {
+      "url": "https://REPLACE_WITH_PUBLIC_HOST/rpc",
+      "transport": "JSONRPC",
+      "security": [
+        {
+          "mtls": []
+        }
+      ]
+    }
+  ],
+  "certificate": {
+    "altNames": {
+      "dns": [
+        "REPLACE_WITH_PUBLIC_HOST"
+      ]
+    }
+  },
+  "capabilities": {
+    "streaming": false,
+    "notification": false,
+    "messageQueue": []
+  },
+  "defaultInputModes": [
+    "application/json",
+    "application/vnd.openxmlformats-officedocument.wordprocessingml.document"
+  ],
+  "defaultOutputModes": [
+    "application/json"
+  ],
+  "skills": [
+    {
+      "id": "thesis-review.format-check",
+      "name": "论文格式检查",
+      "description": "依据可配置院校规范检查页面、标题、正文、目录、图表、参考文献与排版细节。",
+      "version": "0.1.0",
+      "tags": [
+        "论文格式",
+        "DOCX",
+        "规范校验",
+        "可追溯报告"
+      ],
+      "examples": [
+        "检查这份毕业论文的格式并返回问题位置、依据与修改建议"
+      ],
+      "inputModes": [
+        "application/json"
+      ],
+      "outputModes": [
+        "application/json"
+      ]
+    },
+    {
+      "id": "thesis-review.logic-check",
+      "name": "论文逻辑审查",
+      "description": "检查章节结构、标题层级、论证支撑、模糊表述与内容一致性，输出启发式风险提示。",
+      "version": "0.1.0",
+      "tags": [
+        "论文逻辑",
+        "结构审查",
+        "论证检查",
+        "风险提示"
+      ],
+      "examples": [
+        "分析论文结构与论证是否完整，并返回可定位的修改建议"
+      ],
+      "inputModes": [
+        "application/json"
+      ],
+      "outputModes": [
+        "application/json"
+      ]
+    },
+    {
+      "id": "thesis-review.cross-stage-comparison",
+      "name": "论文跨阶段对比",
+      "description": "比较开题、中期和终稿的研究主题、目标、目录、关键词与篇幅变化，输出可解释的漂移指标。",
+      "version": "0.1.0",
+      "tags": [
+        "跨阶段对比",
+        "目标漂移",
+        "开题",
+        "中期",
+        "终稿"
+      ],
+      "examples": [
+        "比较开题报告、中期报告和终稿，指出目标或研究内容是否发生未说明的漂移"
+      ],
+      "inputModes": [
+        "application/json"
+      ],
+      "outputModes": [
+        "application/json"
+      ]
+    }
+  ]
+}

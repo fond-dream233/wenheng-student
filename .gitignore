@@ -1,0 +1,36 @@
+# Python
+__pycache__/
+*.py[cod]
+.pytest_cache/
+.mypy_cache/
+.ruff_cache/
+.venv/
+.playwright-cli/
+node_modules/
+
+# Local configuration and credentials
+.env
+*.key
+*.pem
+*.crt
+*.p12
+
+# Runtime data (contains student papers, reports, credentials and logs)
+logs/
+outputs/
+
+# ACPs/AIP runtime identity material
+competition/runtime/
+competition/certs/
+competition/aip-evidence.local.json
+competition/cross-stage-evidence.local.json
+evaluation/generated/
+evaluation/results/
+evaluation/real_private/
+evaluation/real_review/
+
+# Editor / OS
+.idea/
+.vscode/
+.DS_Store
+Thumbs.db

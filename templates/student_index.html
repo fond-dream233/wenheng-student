@@ -1,0 +1,177 @@
+{% extends "base.html" %}
+{% block title %}我的论文 - {{ school_name }}{% endblock %}
+{% block content %}
+<h4 class="mb-3">我的论文</h4>
+
+{% if configured == 0 %}
+    <div class="alert alert-warning">
+        指导教师尚未配置论文格式规范，本次分析只输出逻辑报告与逻辑分。
+    </div>
+{% endif %}
+
+<div class="card mb-4">
+    <div class="card-body">
+        <h6 class="card-title">上传阶段文档（.docx）</h6>
+        <form method="post" action="{{ url_for('student.upload') }}" enctype="multipart/form-data">
+            <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
+            <div class="row g-2 align-items-end">
+                <div class="col-lg-4">
+                    <label class="form-label small" for="project_title">课题名称</label>
+                    <input id="project_title" name="project_title" class="form-control"
+                           list="project-options" maxlength="120" required
+                           placeholder="输入新课题或选择已有课题">
+                    <datalist id="project-options">
+                        {% for project in projects %}<option value="{{ project.title }}">{% endfor %}
+                    </datalist>
+                </div>
+                <div class="col-lg-2">
+                    <label class="form-label small" for="stage">论文阶段</label>
+                    <select id="stage" name="stage" class="form-select" required>
+                        <option value="proposal">开题</option>
+                        <option value="midterm">中期</option>
+                        <option value="final">终稿</option>
+                    </select>
+                </div>
+                <div class="col-lg-4">
+                    <label class="form-label small" for="stage_file">DOCX 文件</label>
+                    <input id="stage_file" type="file" class="form-control" name="file" accept=".docx" required>
+                </div>
+                <div class="col-lg-2 d-grid">
+                    <button class="btn btn-primary" type="submit">上传并分析</button>
+                </div>
+            </div>
+            <p class="text-muted small mt-2 mb-0">
+                同一课题可分别上传开题、中期和终稿；重复上传同一阶段时，跨阶段分析使用该阶段的最新版本。
+            </p>
+        </form>
+    </div>
+</div>
+
+<div class="card mb-4">
+    <div class="card-body">
+        <h6 class="card-title">课题阶段与跨阶段报告</h6>
+        <div class="table-responsive">
+            <table class="table table-sm align-middle">
+                <thead><tr><th>课题</th><th>已上传阶段</th><th>最新风险</th><th>更新时间</th><th class="no-print">操作</th></tr></thead>
+                <tbody>
+                {% for project in projects %}
+                    <tr>
+                        <td><strong>{{ project.title }}</strong></td>
+                        <td>
+                            {% for item in project.stages %}
+                                <span class="badge text-bg-light border me-1">{{ stage_labels[item.stage] }}</span>
+                            {% endfor %}
+                            <span class="text-muted small">{{ project.stage_count }}/3</span>
+                        </td>
+                        <td>
+                            {% if project.latest_report %}
+                                {% set risk = project.latest_report.risk_level %}
+                                <span class="badge {{ 'text-bg-danger' if risk == 'high' else 'text-bg-warning' if risk == 'medium' else 'text-bg-success' }}">
+                                    {{ '高' if risk == 'high' else '中' if risk == 'medium' else '低' }}风险
+                                </span>
+                                <span class="small ms-1">{{ '%.1f'|format(project.latest_report.drift_score) }}</span>
+                            {% else %}<span class="text-muted small">尚未分析</span>{% endif %}
+                        </td>
+                        <td class="small">{{ project.updated_at }}</td>
+                        <td class="no-print text-nowrap">
+                            {% if project.stage_count >= 2 %}
+                                <form method="post" class="d-inline" action="{{ url_for('student.compare_project', project_id=project.id) }}">
+                                    <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
+                                    <button class="btn btn-sm btn-primary" type="submit">{{ '重新对比' if project.latest_report else '开始对比' }}</button>
+                                </form>
+                            {% else %}
+                                <span class="text-muted small">还需上传一个阶段</span>
+                            {% endif %}
+                            {% if project.latest_report %}
+                                <a class="btn btn-sm btn-outline-primary" href="{{ url_for('student.view_stage_report', report_id=project.latest_report.id) }}">查看报告</a>
+                            {% endif %}
+                        </td>
+                    </tr>
+                {% else %}
+                    <tr><td colspan="5" class="text-muted">尚未建立课题，请先上传一个阶段文档</td></tr>
+                {% endfor %}
+                </tbody>
+            </table>
+        </div>
+    </div>
+</div>
+
+<div class="card mb-4">
+    <div class="card-body">
+        <h6 class="card-title">提交记录与分析报告</h6>
+        <div class="table-responsive">
+            <table class="table table-sm align-middle">
+                <thead>
+                <tr>
+                    <th>版本</th>
+                    <th>课题 / 阶段</th>
+                    <th>文件</th>
+                    <th>上传时间</th>
+                    <th>格式分</th>
+                    <th>逻辑分</th>
+                    <th>AI 痕迹</th>
+                    <th>总分</th>
+                    <th class="no-print">操作</th>
+                </tr>
+                </thead>
+                <tbody>
+                {% for paper in papers %}
+                    <tr>
+                        <td>v{{ paper['version'] }}</td>
+                        <td class="small">
+                            {{ paper['project_title'] or '历史提交' }}
+                            <div><span class="badge text-bg-light border">{{ stage_labels.get(paper['stage'], '终稿') }}</span></div>
+                        </td>
+                        <td class="small">
+                            {{ paper['original_name'] }}
+                            {% if paper['title'] %}<div class="text-muted small">{{ paper['title'] }}</div>{% endif %}
+                            {% if paper['status'] == 'failed' %}
+                                <div class="text-danger small">{{ paper['error_msg'] }}</div>
+                            {% endif %}
+                        </td>
+                        <td class="small">{{ paper['uploaded_at'] }}</td>
+                        <td>{{ '%.1f'|format(paper['format_score']) if paper['format_score'] is not none else '-' }}</td>
+                        <td>{{ '%.1f'|format(paper['logic_score']) if paper['logic_score'] is not none else '-' }}</td>
+                        <td class="{{ 'text-danger' if (paper['ai_likelihood'] or 0) >= 70 else '' }}">
+                            {{ '%.0f'|format(paper['ai_likelihood'] or 0) }}</td>
+                        <td><strong>{{ '%.1f'|format(paper['total_score']) if paper['total_score'] is not none else '-' }}</strong></td>
+                        <td class="no-print">
+                            {% if paper['report_id'] %}
+                                <a class="btn btn-sm btn-outline-primary"
+                                   href="{{ url_for('student.view_report', report_id=paper['report_id']) }}">查看报告</a>
+                                <a class="btn btn-sm btn-outline-secondary"
+                                   href="{{ url_for('student.download_report', report_id=paper['report_id']) }}">下载</a>
+                            {% endif %}
+                            <form method="post" class="d-inline"
+                                  action="{{ url_for('student.analyze', paper_id=paper['id']) }}">
+                                <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
+                                <button class="btn btn-sm btn-outline-warning" type="submit">
+                                    {{ '重新分析' if paper['report_id'] else '开始分析' }}</button>
+                            </form>
+                        </td>
+                    </tr>
+                {% else %}
+                    <tr><td colspan="9" class="text-muted">尚未上传论文</td></tr>
+                {% endfor %}
+                </tbody>
+            </table>
+        </div>
+    </div>
+</div>
+
+<div class="card" style="max-width: 460px;">
+    <div class="card-body">
+        <h6 class="card-title">修改密码</h6>
+        <form method="post" action="{{ url_for('student.change_password') }}">
+            <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
+            <div class="mb-2">
+                <input type="password" class="form-control" name="old_password" placeholder="原密码" required>
+            </div>
+            <div class="mb-2">
+                <input type="password" class="form-control" name="new_password" placeholder="新密码（至少 6 位）" required>
+            </div>
+            <button class="btn btn-outline-primary" type="submit">修改</button>
+        </form>
+    </div>
+</div>
+{% endblock %}

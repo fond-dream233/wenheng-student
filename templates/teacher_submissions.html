@@ -1,0 +1,93 @@
+{% extends "base.html" %}
+{% block title %}提交与报告 - {{ school_name }}{% endblock %}
+{% block content %}
+<h4 class="mb-3">论文提交与报告</h4>
+<div class="card mb-4">
+    <div class="card-body">
+        <h6 class="card-title">跨阶段分析报告</h6>
+        <div class="table-responsive">
+            <table class="table table-sm align-middle">
+                <thead><tr><th>学生</th><th>课题</th><th>风险等级</th><th>漂移分</th><th>生成时间</th><th class="no-print">报告</th></tr></thead>
+                <tbody>
+                {% for item in stage_reports %}
+                    <tr>
+                        <td>{{ item.name }}<div class="text-muted small">{{ item.student_no }} {{ item.class_name }}</div></td>
+                        <td>{{ item.project_title }}</td>
+                        <td>
+                            <span class="badge {{ 'text-bg-danger' if item.risk_level == 'high' else 'text-bg-warning' if item.risk_level == 'medium' else 'text-bg-success' }}">
+                                {{ '高' if item.risk_level == 'high' else '中' if item.risk_level == 'medium' else '低' }}风险
+                            </span>
+                        </td>
+                        <td>{{ '%.1f'|format(item.drift_score) }}</td>
+                        <td class="small">{{ item.created_at }}</td>
+                        <td class="no-print"><a class="btn btn-sm btn-outline-primary" href="{{ url_for('teacher.view_stage_report', report_id=item.id) }}">查看</a></td>
+                    </tr>
+                {% else %}
+                    <tr><td colspan="6" class="text-muted">暂无跨阶段分析报告</td></tr>
+                {% endfor %}
+                </tbody>
+            </table>
+        </div>
+    </div>
+</div>
+
+<div class="card">
+    <div class="card-body">
+        <h6 class="card-title">阶段文档与单篇报告</h6>
+        <div class="table-responsive">
+            <table class="table table-sm align-middle">
+                <thead>
+                <tr>
+                    <th>学生</th>
+                    <th>论文</th>
+                    <th>课题 / 阶段</th>
+                    <th>版本</th>
+                    <th>上传时间</th>
+                    <th>格式</th>
+                    <th>逻辑</th>
+                    <th>AI</th>
+                    <th>总分</th>
+                    <th class="no-print">报告</th>
+                </tr>
+                </thead>
+                <tbody>
+                {% for item in submissions %}
+                    <tr>
+                        <td>{{ item['name'] }}<div class="text-muted small">{{ item['student_no'] }}</div></td>
+                        <td class="small">
+                            {{ item['original_name'] }}
+                            {% if item['status'] == 'failed' %}
+                                <div class="text-danger small">{{ item['error_msg'] }}</div>
+                            {% endif %}
+                        </td>
+                        <td class="small">
+                            {{ item.project_title or '历史提交' }}
+                            <div><span class="badge text-bg-light border">{{ stage_labels.get(item.stage, '终稿') }}</span></div>
+                        </td>
+                        <td>v{{ item['version'] }}</td>
+                        <td class="small">{{ item['uploaded_at'] }}</td>
+                        <td>{{ '%.0f'|format(item['format_score']) if item['format_score'] is not none else '-' }}</td>
+                        <td>{{ '%.0f'|format(item['logic_score']) if item['logic_score'] is not none else '-' }}</td>
+                        <td class="{{ 'text-danger' if (item['ai_likelihood'] or 0) >= 70 else '' }}">
+                            {{ '%.0f'|format(item['ai_likelihood'] or 0) }}</td>
+                        <td><strong>{{ '%.0f'|format(item['total_score']) if item['total_score'] is not none else '-' }}</strong></td>
+                        <td class="no-print">
+                            {% if item['report_id'] %}
+                                <a class="btn btn-sm btn-outline-primary"
+                                   href="{{ url_for('teacher.view_report', report_id=item['report_id']) }}">查看</a>
+                                <a class="btn btn-sm btn-outline-secondary"
+                                   href="{{ url_for('teacher.download_report', report_id=item['report_id']) }}">下载</a>
+                            {% else %}
+                                <span class="text-muted small">未生成</span>
+                            {% endif %}
+                        </td>
+                    </tr>
+                {% else %}
+                    <tr><td colspan="10" class="text-muted">暂无提交记录</td></tr>
+                {% endfor %}
+                </tbody>
+            </table>
+        </div>
+    </div>
+</div>
+{% endblock %}

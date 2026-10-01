@@ -1,0 +1,57 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <link rel="icon" href="data:,">
+    <title>{% block title %}{{ school_name }} {{ system_name }}{% endblock %}</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link href="{{ url_for('static', filename='css/app.css') }}" rel="stylesheet">
+</head>
+<body>
+<nav class="navbar navbar-expand-lg navbar-dark bg-primary">
+    <div class="container-fluid">
+        <span class="navbar-brand">{{ school_name }} {{ system_name }}</span>
+        <div class="d-flex text-white align-items-center">
+            <span class="me-3">{{ session.get('name') }}（{{ '教师' if session.get('role') == 'teacher' else '学生' }}）</span>
+            <form method="post" action="{{ url_for('auth.logout') }}" class="d-inline">
+                <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
+                <button class="btn btn-sm btn-outline-light" type="submit">退出</button>
+            </form>
+        </div>
+    </div>
+</nav>
+<div class="container-fluid">
+    <div class="row">
+        <nav class="col-lg-2 col-md-3 bg-light sidebar py-3">
+            <ul class="nav flex-column">
+                {% if session.get('role') == 'teacher' %}
+                    <li class="nav-item"><a class="nav-link" href="{{ url_for('teacher.dashboard') }}">班级概览</a></li>
+                    <li class="nav-item"><a class="nav-link" href="{{ url_for('teacher.students') }}">学生账号</a></li>
+                    <li class="nav-item"><a class="nav-link" href="{{ url_for('teacher.submissions') }}">提交与报告</a></li>
+                    <li class="nav-item"><a class="nav-link" href="{{ url_for('teacher.rules') }}">格式规范配置</a></li>
+                {% else %}
+                    <li class="nav-item"><a class="nav-link" href="{{ url_for('student.index') }}">我的论文</a></li>
+                {% endif %}
+            </ul>
+        </nav>
+        <main class="col-lg-10 col-md-9 py-3 px-4">
+            {% with messages = get_flashed_messages(with_categories=true) %}
+                {% if messages %}
+                    {% for category, message in messages %}
+                        <div class="alert alert-{{ 'danger' if category == 'error' else category }} alert-dismissible fade show" role="alert">
+                            {{ message }}
+                            <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+                        </div>
+                    {% endfor %}
+                {% endif %}
+            {% endwith %}
+            {% block content %}{% endblock %}
+        </main>
+    </div>
+</div>
+<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/js/bootstrap.bundle.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.1/dist/chart.umd.min.js"></script>
+{% block scripts %}{% endblock %}
+</body>
+</html>

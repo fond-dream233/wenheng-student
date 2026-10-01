@@ -1,0 +1,30 @@
+{
+  "aic": "REPLACE_WITH_LOGIC_PARTNER_AIC",
+  "active": true,
+  "lastModifiedTime": "2026-09-21T00:00:00+08:00",
+  "protocolVersion": "02.02",
+  "name": "论文逻辑审查智能体",
+  "description": "检查论文章节结构、标题层级、论证支撑、模糊表述与内容一致性，输出结构化审查结果；AI 痕迹仅作为启发式风险提示。",
+  "version": "0.1.0",
+  "provider": {"organization": "参赛团队", "department": "", "url": "", "license": "MulanPSL-2.0"},
+  "securitySchemes": {"mtls": {"type": "mutualTLS", "description": "智能体间 mTLS 双向认证"}},
+  "endPoints": [
+    {"url": "https://REPLACE_WITH_LOGIC_HOST/rpc", "transport": "JSONRPC", "security": [{"mtls": []}]}
+  ],
+  "certificate": {"altNames": {"dns": ["REPLACE_WITH_LOGIC_HOST"]}},
+  "capabilities": {"streaming": false, "notification": false, "messageQueue": []},
+  "defaultInputModes": ["application/json", "application/vnd.openxmlformats-officedocument.wordprocessingml.document"],
+  "defaultOutputModes": ["application/json"],
+  "skills": [
+    {
+      "id": "thesis-review.logic-check",
+      "name": "论文逻辑审查",
+      "description": "检查结构和论证并返回可定位的修改建议与启发式风险指标。",
+      "version": "0.1.0",
+      "tags": ["论文逻辑", "结构审查", "论证检查", "风险提示"],
+      "examples": ["分析论文结构与论证是否完整，并返回可定位的修改建议"],
+      "inputModes": ["application/json"],
+      "outputModes": ["application/json"]
+    }
+  ]
+}

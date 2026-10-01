@@ -1,0 +1,94 @@
+{% extends "base.html" %}
+{% block title %}格式规范配置 - {{ school_name }}{% endblock %}
+{% block content %}
+<h4 class="mb-3">论文格式规范配置</h4>
+
+<div class="alert alert-info d-flex justify-content-between align-items-center">
+    <span>
+        当前已启用 <strong>{{ configured }}</strong> / {{ total }} 项规范。
+        {% if competition_mode %}当前为竞赛匿名模式，请按演示规范逐项核对；{% else %}默认值取自学校论文模板，可按本院要求逐项修改；{% endif %}
+        留空的规则在分析时会自动跳过（不计入格式分）。
+    </span>
+    <span class="no-print">
+        <form method="post" action="{{ url_for('teacher.load_preset') }}" class="d-inline">
+            <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
+            <button class="btn btn-sm btn-primary" type="submit"
+                    onclick="return confirm('将用学校模板默认规范覆盖当前所有配置，确定继续？');">载入模板默认规范</button>
+        </form>
+        <form method="post" action="{{ url_for('teacher.clear_rules') }}" class="d-inline">
+            <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
+            <button class="btn btn-sm btn-outline-secondary" type="submit"
+                    onclick="return confirm('确定清空全部规范配置？');">清空</button>
+        </form>
+    </span>
+</div>
+
+<form method="post" action="{{ url_for('teacher.save_rules') }}">
+    <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
+    {% for label, rules in groups %}
+        <div class="card mb-3">
+            <div class="card-header bg-white"><strong>{{ label }}</strong></div>
+            <div class="card-body p-0">
+                <table class="table table-sm mb-0 align-middle">
+                    <thead class="table-light">
+                    <tr>
+                        <th style="width:70px;">启用</th>
+                        <th style="width:200px;">检查项</th>
+                        <th>要求（期望值）</th>
+                        <th style="width:90px;">权重</th>
+                    </tr>
+                    </thead>
+                    <tbody>
+                    {% for rule, row in rules %}
+                        <tr class="rule-row">
+                            <td class="text-center">
+                                <input type="checkbox" class="form-check-input" name="enabled_{{ rule.key }}"
+                                       {% if row and row['enabled'] %}checked{% endif %}>
+                            </td>
+                            <td>
+                                {{ rule.title }}
+                                {% if rule.hint %}<div class="text-muted small">{{ rule.hint }}</div>{% endif %}
+                            </td>
+                            <td>
+                                {% if rule.input_type == 'select' %}
+                                    <select class="form-select form-select-sm" name="expected_{{ rule.key }}">
+                                        <option value="">（不检查）</option>
+                                        {% for opt in rule.options %}
+                                            <option value="{{ opt }}"
+                                                    {% if row and row['expected'] == opt %}selected{% endif %}>{{ opt }}</option>
+                                        {% endfor %}
+                                    </select>
+                                {% elif rule.input_type == 'checkbox' %}
+                                    <select class="form-select form-select-sm" name="expected_{{ rule.key }}">
+                                        <option value="">（不检查）</option>
+                                        <option value="1" {% if row and row['expected'] == '1' %}selected{% endif %}>要求</option>
+                                        <option value="0" {% if row and row['expected'] == '0' %}selected{% endif %}>不要求</option>
+                                    </select>
+                                {% elif rule.input_type == 'number' %}
+                                    <div class="input-group input-group-sm">
+                                        <input type="text" class="form-control" name="expected_{{ rule.key }}"
+                                               value="{{ row['expected'] if row else '' }}">
+                                        <span class="input-group-text">{{ rule.unit }}</span>
+                                    </div>
+                                {% else %}
+                                    <input type="text" class="form-control form-control-sm"
+                                           name="expected_{{ rule.key }}"
+                                           value="{{ row['expected'] if row else '' }}"
+                                           placeholder="{{ rule.preset }}">
+                                {% endif %}
+                            </td>
+                            <td>
+                                <input type="number" step="1" min="0" class="form-control form-control-sm"
+                                       name="weight_{{ rule.key }}"
+                                       value="{{ row['weight'] if row else rule.default_weight }}">
+                            </td>
+                        </tr>
+                    {% endfor %}
+                    </tbody>
+                </table>
+            </div>
+        </div>
+    {% endfor %}
+    <button class="btn btn-primary no-print" type="submit">保存规范配置</button>
+</form>
+{% endblock %}

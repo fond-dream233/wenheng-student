@@ -1,0 +1,55 @@
+.sidebar {
+    min-height: calc(100vh - 56px);
+}
+
+.sidebar .nav-link {
+    color: #333;
+    border-radius: 6px;
+    padding: .5rem .75rem;
+}
+
+.sidebar .nav-link:hover {
+    background: #e7f1ff;
+    color: #0d6efd;
+}
+
+.score-badge {
+    font-size: 2rem;
+    font-weight: 700;
+    line-height: 1;
+}
+
+.rule-row td {
+    vertical-align: middle;
+}
+
+.issue-text {
+    font-size: .92rem;
+}
+
+.report-section {
+    margin-bottom: 2rem;
+}
+
+.stage-card {
+    border-top: 3px solid #0d6efd;
+}
+
+.progress {
+    height: 1.4rem;
+    background-color: #e9ecef;
+}
+
+.progress-bar {
+    min-width: 2.75rem;
+}
+
+@media print {
+    .no-print {
+        display: none !important;
+    }
+
+    .sidebar {
+        display: none;
+    }
+}
