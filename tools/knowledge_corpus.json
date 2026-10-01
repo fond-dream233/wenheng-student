@@ -1,0 +1,188 @@
+{
+  "entries": [
+    {
+      "id": "common-struct-001",
+      "stage": "common",
+      "category": "structure",
+      "title": "论文结构完整性",
+      "clause": "论文结构应完整，一般包含题名、摘要、关键词、正文、结论与参考文献；正文各部分应有清晰层次。",
+      "tags": ["论文结构", "章节", "完整性", "摘要", "结论", "参考文献"]
+    },
+    {
+      "id": "common-struct-002",
+      "stage": "common",
+      "category": "structure",
+      "title": "摘要独立成文",
+      "clause": "摘要应独立成文，概括研究目的、方法、主要结果与结论，不使用图表或引用，字数符合规定。",
+      "tags": ["摘要", "研究目的", "研究方法", "结论"]
+    },
+    {
+      "id": "common-struct-003",
+      "stage": "common",
+      "category": "structure",
+      "title": "关键词选取",
+      "clause": "关键词应选取能反映论文主题的规范词，一般 3 至 5 个，用分号或空格分隔。",
+      "tags": ["关键词", "主题词", "检索"]
+    },
+    {
+      "id": "common-format-001",
+      "stage": "common",
+      "category": "format",
+      "title": "正文排版规范",
+      "clause": "正文应采用统一的字体、字号与行距，标题层级清晰，段首缩进与对齐方式前后一致。",
+      "tags": ["字体", "字号", "行距", "排版", "标题层级"]
+    },
+    {
+      "id": "common-format-002",
+      "stage": "common",
+      "category": "format",
+      "title": "图表编号与题名",
+      "clause": "图表应有编号与题名；表格题名置于表格上方，图题置于图下方，并在正文中引用。",
+      "tags": ["图表", "编号", "题名", "表格", "图"]
+    },
+    {
+      "id": "common-format-003",
+      "stage": "common",
+      "category": "format",
+      "title": "参考文献著录规范",
+      "clause": "参考文献著录应符合 GB/T 7714 的格式要求，正文引用与文末著录一一对应。",
+      "tags": ["参考文献", "GB/T 7714", "著录", "引用"]
+    },
+    {
+      "id": "common-integrity-001",
+      "stage": "common",
+      "category": "integrity",
+      "title": "直接引用注明出处",
+      "clause": "直接引用他人成果应加引号并注明出处，不得将他人的表述原样摘录而不说明来源。",
+      "tags": ["直接引用", "引号", "出处", "引用规范"]
+    },
+    {
+      "id": "common-integrity-002",
+      "stage": "common",
+      "category": "integrity",
+      "title": "转述观点注明来源",
+      "clause": "转述或概括他人观点时应注明来源，不得将他人研究成果据为己有。",
+      "tags": ["转述", "观点", "来源", "学术规范"]
+    },
+    {
+      "id": "common-integrity-003",
+      "stage": "common",
+      "category": "integrity",
+      "title": "生成式工具使用说明",
+      "clause": "使用生成式工具辅助写作时，应如实说明使用范围并对其生成内容进行核验，确保内容可追溯。",
+      "tags": ["生成式工具", "AI辅助", "说明", "核验", "可追溯"]
+    },
+    {
+      "id": "common-logic-001",
+      "stage": "common",
+      "category": "logic",
+      "title": "论证逻辑自洽",
+      "clause": "论证应逻辑自洽，观点与论据对应，避免前后矛盾、以偏概全或循环论证。",
+      "tags": ["论证", "逻辑自洽", "论据", "矛盾"]
+    },
+    {
+      "id": "proposal-struct-001",
+      "stage": "proposal",
+      "category": "structure",
+      "title": "开题报告要素",
+      "clause": "开题报告应包含选题背景与意义、国内外研究现状、研究目标与内容、研究方法与技术路线、预期成果与进度安排。",
+      "tags": ["开题报告", "研究背景", "研究现状", "研究目标", "技术路线", "进度安排"]
+    },
+    {
+      "id": "proposal-struct-002",
+      "stage": "proposal",
+      "category": "structure",
+      "title": "研究问题与创新点",
+      "clause": "开题报告应明确拟解决的研究问题，并说明相对于现有工作的预期创新点。",
+      "tags": ["研究问题", "创新点", "开题"]
+    },
+    {
+      "id": "proposal-logic-001",
+      "stage": "proposal",
+      "category": "logic",
+      "title": "研究目标具体可验证",
+      "clause": "研究目标应具体、可衡量、可验证，避免用空泛或无法检验的表述代替明确目标。",
+      "tags": ["研究目标", "可衡量", "可验证", "具体"]
+    },
+    {
+      "id": "proposal-logic-002",
+      "stage": "proposal",
+      "category": "logic",
+      "title": "技术路线与研究内容对应",
+      "clause": "技术路线应与研究内容一一对应，方法选择应能支撑拟达成的目标。",
+      "tags": ["技术路线", "研究内容", "研究方法"]
+    },
+    {
+      "id": "proposal-logic-003",
+      "stage": "proposal",
+      "category": "logic",
+      "title": "进度安排合理",
+      "clause": "进度安排应阶段清晰、时间分配合理，并与研究内容的工作量相匹配。",
+      "tags": ["进度安排", "时间", "阶段"]
+    },
+    {
+      "id": "proposal-integrity-001",
+      "stage": "proposal",
+      "category": "integrity",
+      "title": "研究现状综述注明来源",
+      "clause": "国内外研究现状综述应注明所引文献来源，客观评述既有工作的优势与不足。",
+      "tags": ["研究现状", "综述", "文献", "评述"]
+    },
+    {
+      "id": "midterm-struct-001",
+      "stage": "midterm",
+      "category": "structure",
+      "title": "中期报告要素",
+      "clause": "中期报告应包含已完成工作、阶段性成果、存在问题与解决方案、下一阶段计划。",
+      "tags": ["中期报告", "已完成工作", "阶段性成果", "存在问题", "后续计划"]
+    },
+    {
+      "id": "midterm-logic-001",
+      "stage": "midterm",
+      "category": "logic",
+      "title": "阶段性成果与目标对应",
+      "clause": "阶段性成果应与开题阶段设定的目标对应，并说明已完成内容与既定进度的匹配情况。",
+      "tags": ["阶段性成果", "目标", "进度", "中期"]
+    },
+    {
+      "id": "midterm-logic-002",
+      "stage": "midterm",
+      "category": "logic",
+      "title": "问题与解决方案具体",
+      "clause": "中期报告应具体说明研究过程中遇到的问题及其解决方案或调整措施，避免只列成果不提问题。",
+      "tags": ["存在问题", "解决方案", "调整", "中期"]
+    },
+    {
+      "id": "final-struct-001",
+      "stage": "final",
+      "category": "structure",
+      "title": "毕业论文完整要素",
+      "clause": "毕业论文应包含摘要、目录、绪论、正文各章、结论、参考文献与致谢，结构完整、章节连贯。",
+      "tags": ["毕业论文", "目录", "绪论", "正文", "结论", "致谢"]
+    },
+    {
+      "id": "final-struct-002",
+      "stage": "final",
+      "category": "structure",
+      "title": "结论呼应研究目标",
+      "clause": "结论应呼应开题与中期设定的研究目标，总结主要发现并说明研究的局限与展望。",
+      "tags": ["结论", "研究目标", "局限", "展望"]
+    },
+    {
+      "id": "final-logic-001",
+      "stage": "final",
+      "category": "logic",
+      "title": "结果与分析对应",
+      "clause": "结果与讨论部分应与研究方法对应，用事实或数据支撑结论，避免结论缺乏依据。",
+      "tags": ["结果", "分析", "数据", "结论", "依据"]
+    },
+    {
+      "id": "final-integrity-001",
+      "stage": "final",
+      "category": "integrity",
+      "title": "参考文献完整对应",
+      "clause": "正文中引用的文献均应在参考文献中列出，参考文献中的条目应确曾在正文中被引用。",
+      "tags": ["参考文献", "正文引用", "一一对应"]
+    }
+  ]
+}
