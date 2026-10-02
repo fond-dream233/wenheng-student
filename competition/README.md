@@ -116,6 +116,8 @@ Web 服务使用 Waitress，格式、逻辑、跨阶段三个 AIP Partner 使用
 - [ ] 开启 mTLS 与发送方 AIC 身份绑定。
 - [ ] 完成梧桐平台跨端访问，保存时间戳、访问量、截图和原始交互日志。
 
+**⚠️ 生产部署红线**：web 与全部三个 Partner 的启动环境必须包含 `COMPETITION_MODE=true`，否则页眉规则（`header_text`）会输出「西南科技大学」默认规范文案，违反材料匿名要求。systemd 单元示例：`Environment=COMPETITION_MODE=true`。部署后必须跨端调用一次并检查报告全文不含学校名。
+
 ### P3：竞争力与材料
 
 - [x] 新增开题/中期/终稿输入类型和跨阶段对比 Partner。
