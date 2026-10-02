@@ -102,7 +102,11 @@ Web 服务使用 Waitress，格式、逻辑、跨阶段三个 AIP Partner 使用
 
 跨阶段 Partner 接收 `documents` 数组，每项使用 `proposal`、`midterm` 或 `final` 阶段标识以及 DOCX 的 Base64 内容。它对相邻阶段计算正文主题、目标章节、标题结构、关键词和篇幅变化，输出 0–100 漂移分、风险等级、证据指标及修改建议。该结果属于确定性词汇与结构风险提示，不是语义事实判断或学术不端认定。
 
+格式 Partner 按论文阶段套用规范（`tools/rules_schema.py` 的 `FINAL_ONLY_RULES`）：摘要、关键词、目录、参考文献著录、总字数与页眉等成稿型规则默认仅在终稿阶段启用，开题/中期自动跳过且不计入格式分，报告中标注「本阶段不适用」；「必需章节」在开题/中期自动替换为对应阶段的默认章节清单（`STAGE_SECTION_PRESETS`），教师自定义的清单不受影响。规则配置页对仅终稿适用的检查项有徽标提示。
+
 2026-09-21 本地验收结果：Web `/health` 返回 `ok`，格式、逻辑、跨阶段 Partner 均返回 `completed`，全量自动化测试 `17 passed`。本地调用证据写入 `competition/aip-evidence.local.json` 和 `competition/cross-stage-evidence.local.json`；这些文件仅用于复现，不应替代 P2 的平台交互日志。
+
+2026-10-02：格式规则阶段化（`FINAL_ONLY_RULES` 门控 + 必需章节分阶段默认值）落地，新增 5 项测试，全量自动化测试 `37 passed`。
 
 ### P2：赛事平台闭环
 

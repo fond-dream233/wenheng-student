@@ -13,7 +13,7 @@ from config.settings import Config
 from competition.stage_comparison import STAGE_LABELS
 from tools.database import Database, now_str
 from tools.logger import get_logger
-from tools.rules_schema import CATEGORIES, RULES, grouped_rules
+from tools.rules_schema import CATEGORIES, FINAL_ONLY_RULES, RULES, grouped_rules
 from utils.decorators import login_required
 from utils.security import hash_password, random_password
 from utils.validators import check_password, check_username
@@ -218,7 +218,7 @@ def rules():
         groups.append((CATEGORIES.get(key, key), [(d, cfg.get(d.key)) for d in defs]))
     configured = sum(1 for r in cfg.values() if r['enabled'] and r['expected'])
     return render_template('teacher_rules.html', groups=groups, configured=configured,
-                           total=len(cfg))
+                           total=len(cfg), final_only=FINAL_ONLY_RULES)
 
 
 @bp.route('/rules/save', methods=['POST'])

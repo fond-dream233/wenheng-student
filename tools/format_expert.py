@@ -7,6 +7,7 @@ from tools.docx_parser import DocInfo
 from tools.format_checks import CHECKS, Finding, MAX_FINDINGS_PER_RULE
 from tools.knowledge_base import cite_for
 from tools.models import FormatReport, Issue, RuleResult
+from tools.rules_schema import rule_applies_to_stage, stage_sections_expected
 
 
 class FormatExpert:
@@ -25,17 +26,22 @@ class FormatExpert:
 
         Args:
             doc: 论文结构化信息。
-            stage: 论文阶段（proposal/midterm/final），用于依据检索。
+            stage: 论文阶段（proposal/midterm/final）。用于：
+                1. 按阶段过滤默认仅终稿适用的规则（跳过且不计分）；
+                2. 替换「必需章节」的默认期望值（教师自定义值不替换）；
+                3. 为问题附加对应阶段的知识库条文依据。
 
         Returns:
             FormatReport；未启用任何规则时 score 为 None。
         """
-        report = FormatReport()
+        report = FormatReport(stage=stage)
         for key, func in CHECKS.items():
             cfg = self.rules.get(key)
             if not cfg:
                 continue
             expected = str(cfg.get("expected") or "").strip()
+            if key == "required_sections":
+                expected = stage_sections_expected(stage, expected)
             item = RuleResult(
                 key=key,
                 title=str(cfg.get("title") or key),
@@ -46,6 +52,10 @@ class FormatExpert:
                 pass_ratio=1.0,
                 expected=expected,
             )
+            if not rule_applies_to_stage(key, stage):
+                item.applicable = False
+                report.items.append(item)
+                continue
             if not (item.enabled and expected):
                 report.items.append(item)
                 continue
@@ -80,8 +90,8 @@ class FormatExpert:
 
     @staticmethod
     def _summarize(report: FormatReport) -> None:
-        """汇总加权得分。"""
-        active = [i for i in report.items if i.enabled and i.configured]
+        """汇总加权得分（仅统计当前阶段适用且已配置的规则）。"""
+        active = [i for i in report.items if i.enabled and i.configured and i.applicable]
         report.configured_count = len(active)
         report.total_weight = round(sum(i.weight for i in active), 2)
         report.earned_weight = round(sum(i.earned for i in active), 2)

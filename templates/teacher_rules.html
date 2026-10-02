@@ -48,6 +48,7 @@
                             <td>
                                 {{ rule.title }}
                                 {% if rule.hint %}<div class="text-muted small">{{ rule.hint }}</div>{% endif %}
+                                {% if rule.key in final_only %}<div class="text-muted small"><span class="badge bg-light text-secondary border">仅毕业论文阶段默认适用</span></div>{% endif %}
                             </td>
                             <td>
                                 {% if rule.input_type == 'select' %}

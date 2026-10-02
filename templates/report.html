@@ -126,7 +126,8 @@
         <div class="card-header bg-white"><strong>一、格式专家报告</strong>
             <span class="text-muted small">按教师配置的规范逐项检查</span></div>
         <div class="card-body p-0">
-            {% set active_rules = result.format_report.items | selectattr('configured') | list %}
+            {% set active_rules = result.format_report.items | selectattr('configured') | selectattr('applicable') | list %}
+            {% set na_rules = result.format_report.items | selectattr('configured') | rejectattr('applicable') | list %}
             {% if active_rules %}
                 <table class="table table-sm mb-0 align-middle">
                     <thead class="table-light">
@@ -162,6 +163,10 @@
                 </table>
             {% else %}
                 <div class="p-3 text-muted">未启用任何格式规范，本次不输出格式分。</div>
+            {% endif %}
+            {% if na_rules %}
+                {% set stage_names = {'proposal': '开题报告', 'midterm': '中期报告', 'final': '毕业论文'} %}
+                <div class="p-2 text-muted small border-top">以下 {{ na_rules | length }} 项检查在{{ stage_names.get(result.format_report.stage, '当前') }}阶段默认不适用，已跳过且未计入格式分：{{ na_rules | map(attribute='title') | join('、') }}。</div>
             {% endif %}
         </div>
         {% if result.format_report.issues %}
@@ -235,8 +240,8 @@
     </p>
 </div>
 <script>
-    const fmtLabels = {{ (result.format_report.items | selectattr('configured') | map(attribute='title') | list) | tojson }};
-    const fmtScores = {{ (result.format_report.items | selectattr('configured') | map(attribute='pass_ratio') | list) | tojson }};
+const fmtLabels = {{ (result.format_report.items | selectattr('configured') | selectattr('applicable') | map(attribute='title') | list) | tojson }};
+const fmtScores = {{ (result.format_report.items | selectattr('configured') | selectattr('applicable') | map(attribute='pass_ratio') | list) | tojson }};
     if (fmtLabels.length) {
         new Chart(document.getElementById('fmtChart'), {
             type: 'bar',

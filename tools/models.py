@@ -30,6 +30,7 @@ class RuleResult:
     configured: bool
     pass_ratio: float
     expected: str = ""
+    applicable: bool = True       # 当前论文阶段是否适用（不适用时不计分）
     issues: List[Issue] = field(default_factory=list)
 
     @property
@@ -39,7 +40,9 @@ class RuleResult:
 
     @property
     def status(self) -> str:
-        """规则状态：skipped / passed / partial / failed。"""
+        """规则状态：na / skipped / passed / partial / failed。"""
+        if not self.applicable:
+            return "na"
         if not (self.enabled and self.configured):
             return "skipped"
         if self.pass_ratio >= 0.999:
@@ -56,6 +59,7 @@ class FormatReport:
     items: List[RuleResult] = field(default_factory=list)
     issues: List[Issue] = field(default_factory=list)
     score: Optional[float] = None      # None 表示尚未配置规范
+    stage: Optional[str] = None        # 本次检查针对的论文阶段（None 表示不区分）
     total_weight: float = 0.0
     earned_weight: float = 0.0
     configured_count: int = 0

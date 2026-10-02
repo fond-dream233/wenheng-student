@@ -145,6 +145,56 @@ RULES: List[RuleDef] = [
     RuleDef("no_trailing_punct_title", "misc", "标题末尾不加标点", "checkbox", preset="1", default_weight=1),
 ]
 
+# 论文阶段标识：开题报告 / 中期报告 / 毕业论文（终稿）
+VALID_STAGES = ("proposal", "midterm", "final")
+
+# 仅毕业论文（终稿）阶段默认适用的规则：开题/中期阶段自动跳过且不计入格式分。
+# 依据：摘要、关键词、目录、参考文献著录与总字数等属于成稿型规范，
+# 开题/中期报告通常不要求；版式、字体、标题、图表等排版规则三个阶段都适用。
+FINAL_ONLY_RULES = frozenset({
+    "min_total_words",
+    "abstract_word_min", "abstract_word_max", "keyword_count", "require_english_abstract",
+    "toc_required", "toc_auto", "toc_max_level",
+    "ref_min_count", "ref_standard", "ref_citation_style", "ref_recent_ratio", "ref_size_pt",
+    "header_text",
+})
+
+# 「必需章节」的分阶段默认值：仅当配置值仍等于终稿默认 preset 时按阶段替换，
+# 教师自定义的章节清单原样保留。中期用粗粒度词以兼容各校表格标题差异。
+STAGE_SECTION_PRESETS = {
+    "proposal": "研究背景,研究内容,研究方法,进度安排,参考文献",
+    "midterm": "进展,成果,问题,计划",
+}
+
+
+def rule_applies_to_stage(key: str, stage: Optional[str]) -> bool:
+    """判断规则在给定阶段是否默认适用。
+
+    Args:
+        key: 规则键。
+        stage: 论文阶段（proposal/midterm/final），None 视为不区分阶段。
+
+    Returns:
+        不适用时返回 False，该规则应跳过且不计分。
+    """
+    if not stage or stage not in ("proposal", "midterm"):
+        return True
+    return key not in FINAL_ONLY_RULES
+
+
+def stage_sections_expected(stage: Optional[str], expected: str) -> str:
+    """按阶段替换「必需章节」的默认期望值。
+
+    仅当 expected 仍等于规则定义的终稿默认 preset 时替换为对应阶段清单，
+    教师自定义值原样返回。
+    """
+    if stage not in STAGE_SECTION_PRESETS:
+        return expected
+    default = get_rule("required_sections")
+    if default and expected.strip() == default.preset:
+        return STAGE_SECTION_PRESETS[stage]
+    return expected
+
 
 def get_rule(key: str) -> Optional[RuleDef]:
     """按键查找规则定义。
