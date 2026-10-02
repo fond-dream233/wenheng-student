@@ -24,6 +24,8 @@ competition/runtime/
 competition/certs/
 competition/aip-evidence.local.json
 competition/cross-stage-evidence.local.json
+# 由 generate_acs.py 生成的待上传 ACS（含真实域名，属部署产物）
+competition/acs.*-partner.json
 evaluation/generated/
 evaluation/results/
 evaluation/real_private/

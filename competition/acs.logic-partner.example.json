@@ -4,7 +4,7 @@
   "lastModifiedTime": "2026-09-21T00:00:00+08:00",
   "protocolVersion": "02.02",
   "name": "论文逻辑审查智能体",
-  "description": "检查论文章节结构、标题层级、论证支撑、模糊表述与内容一致性，输出结构化审查结果；AI 痕迹仅作为启发式风险提示。",
+  "description": "检查论文章节结构、标题层级、论证支撑、模糊表述与内容一致性，覆盖开题报告研究目标与技术路线、中期报告阶段成果与下一步计划、毕业论文结论呼应等阶段要素与内容合理性审查，输出结构化审查结果与知识库规范条文依据；AI 痕迹仅作为启发式风险提示。",
   "version": "0.1.0",
   "provider": {"organization": "参赛团队", "department": "", "url": "", "license": "MulanPSL-2.0"},
   "securitySchemes": {"mtls": {"type": "mutualTLS", "description": "智能体间 mTLS 双向认证"}},
@@ -19,10 +19,10 @@
     {
       "id": "thesis-review.logic-check",
       "name": "论文逻辑审查",
-      "description": "检查结构和论证并返回可定位的修改建议与启发式风险指标。",
+      "description": "按论文阶段审查结构与论证，返回可定位的修改建议、规范条文依据与启发式风险指标。",
       "version": "0.1.0",
-      "tags": ["论文逻辑", "结构审查", "论证检查", "风险提示"],
-      "examples": ["分析论文结构与论证是否完整，并返回可定位的修改建议"],
+      "tags": ["论文逻辑", "结构审查", "论证检查", "内容合理性", "开题报告", "中期报告", "毕业论文", "风险提示"],
+      "examples": ["分析论文结构与论证是否完整，并返回可定位的修改建议", "审查这份中期报告是否写明已取得的阶段成果、存在问题与下一步计划"],
       "inputModes": ["application/json"],
       "outputModes": ["application/json"]
     }

@@ -4,7 +4,7 @@
   "lastModifiedTime": "2026-09-21T00:00:00+08:00",
   "protocolVersion": "02.02",
   "name": "论文格式检查智能体",
-  "description": "依据可配置论文规范检查 DOCX 页面、标题、正文、目录、图表、参考文献与排版细节，输出可定位的结构化问题和修改建议。",
+  "description": "依据可配置论文规范检查 DOCX 页面、标题、正文、目录、图表、参考文献与排版细节，适配开题报告、中期报告、毕业论文三个阶段自动套用适用规则，输出可定位的结构化问题、知识库规范条文依据和修改建议。",
   "version": "0.1.0",
   "provider": {"organization": "参赛团队", "department": "", "url": "", "license": "MulanPSL-2.0"},
   "securitySchemes": {"mtls": {"type": "mutualTLS", "description": "智能体间 mTLS 双向认证"}},
@@ -19,10 +19,10 @@
     {
       "id": "thesis-review.format-check",
       "name": "论文格式检查",
-      "description": "检查格式规范并返回分数、问题位置、规则依据与修改建议。",
+      "description": "按论文阶段套用格式规范，返回分数、问题位置、知识库规范条文依据与修改建议。",
       "version": "0.1.0",
-      "tags": ["论文格式", "DOCX", "规范校验", "可追溯报告"],
-      "examples": ["检查这份毕业论文的格式并返回问题位置、依据与修改建议"],
+      "tags": ["论文格式", "格式规范", "DOCX", "规范校验", "开题报告", "中期报告", "毕业论文", "可追溯报告"],
+      "examples": ["检查这份毕业论文的格式并返回问题位置、依据与修改建议", "检查这份开题报告的格式，仅终稿适用的规则自动跳过不计分"],
       "inputModes": ["application/json"],
       "outputModes": ["application/json"]
     }
