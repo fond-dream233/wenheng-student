@@ -164,3 +164,70 @@ def test_report_html_final_stage_has_no_na_note(tmp_path: Path) -> None:
     html_path, _ = builder.build(result, "演示高校")
     html = Path(html_path).read_text(encoding="utf-8")
     assert "默认不适用" not in html
+
+
+def test_web_upload_proposal_applies_stage_gating(tmp_path: Path) -> None:
+    """Web 上传开题文档后，真实分析管线按阶段门控格式规则。"""
+    import io
+    import json
+    import re
+    import uuid
+
+    from app import app
+    from config.settings import Config
+    from tools.database import now_str
+    from utils.security import hash_password
+
+    client = app.test_client()
+    username = f"fmt-stage-{uuid.uuid4().hex[:10]}"
+    db = app.extensions["db"]
+    user_id = db.execute(
+        "INSERT INTO users (username, password_hash, role, name, student_no, created_at)"
+        " VALUES (?, ?, 'student', ?, ?, ?)",
+        (username, hash_password("Test-password-123"), "匿名学生", username, now_str()),
+    )
+    with client.session_transaction() as sess:
+        sess["user_id"] = user_id
+        sess["username"] = username
+        sess["role"] = "student"
+        sess["name"] = "匿名学生"
+
+    html = client.get("/student/").get_data(as_text=True)
+    token = re.search(r'name="csrf_token" value="([^"]+)"', html).group(1)
+
+    stream = io.BytesIO()
+    doc = Document()
+    doc.add_heading("一、研究背景", level=1)
+    doc.add_paragraph("围绕论文质量自动检查建立可解释的评价指标。" * 10)
+    doc.add_heading("二、研究内容", level=1)
+    doc.add_paragraph("设计并实现论文格式与逻辑检查系统。" * 10)
+    doc.save(stream)
+    stream.seek(0)
+
+    response = client.post(
+        "/student/upload",
+        data={
+            "csrf_token": token,
+            "project_title": "阶段门控验证课题",
+            "stage": "proposal",
+            "file": (stream, "proposal.docx"),
+        },
+        content_type="multipart/form-data",
+        follow_redirects=True,
+    )
+    assert response.status_code == 200
+
+    paper = db.get(
+        "SELECT * FROM papers WHERE student_id = ? ORDER BY id DESC LIMIT 1", (user_id,)
+    )
+    assert paper["status"] == "analyzed", paper["error_msg"]
+    result_path = Config.RESULT_DIR / f"report_{paper['id']}.json"
+    payload = json.loads(result_path.read_text(encoding="utf-8"))
+    fmt = payload["format_report"]
+    assert fmt["stage"] == "proposal"
+    na_items = [i for i in fmt["items"] if not i["applicable"]]
+    assert na_items, "开题阶段应存在不适用的格式规则"
+    assert {i["key"] for i in na_items} >= {"toc_required", "abstract_word_min"}
+    assert fmt["score"] is not None
+    sections = next(i for i in fmt["items"] if i["key"] == "required_sections")
+    assert sections["expected"] == STAGE_SECTION_PRESETS["proposal"]
